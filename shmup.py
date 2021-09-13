@@ -49,6 +49,15 @@ all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
+font_name = pygame.font.match_font('arial')
+def draw_text(surface, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surface.blit(text_surface, text_rect)
+
+
 # Player sprite
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -91,7 +100,7 @@ class Mob(pygame.sprite.Sprite):
         self.image_orig.set_colorkey(BLACK)
         self.image = self.image_orig.copy()
         self.rect = self.image.get_rect()
-        self.radius = int(self.rect.width / 2)
+        self.radius = int(self.rect.width * .85 / 2)
         # pygame.draw.circle(self.image, RED, self.rect.center, self.radius)
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-150, -100)
@@ -118,7 +127,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect.y += self.speedy
         self.rect.x += self.speedx
 
-        if self.rect.left < -25 or self.rect.right > WIDTH + 10 or  self.rect.top > HEIGHT + 10:
+        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 8)
@@ -149,6 +158,8 @@ for i in range(9):
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
+
+score = 0
     
 # Game loop
 running = True
@@ -171,6 +182,7 @@ while running:
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
 
     for hit in hits:
+        score += 50 - hit.radius
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
@@ -184,6 +196,8 @@ while running:
     screen.fill(BLACK)
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
+    draw_text(screen, str(score), 18, WIDTH /2, 10)
+    
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
